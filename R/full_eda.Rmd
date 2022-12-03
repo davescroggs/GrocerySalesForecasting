@@ -102,7 +102,9 @@ train %>%
        col = "Quantile")
 ```
 
+#### Median unit sales per item
 
+- For all stores, the median units sold per item is between 2-8. Stores sell lots of low number of items per day?
 
 ```{r}
 train %>% 
@@ -117,14 +119,36 @@ train %>%
        col = "Median")
 ```
 
-
+#### Store toal sales
 
 ```{r}
-train %>% 
-  filter(store_nbr == 1) %>% 
-  mutate(year = year(date)) +
+total_sales <- train %>% 
+  count(year = year(date), store_nbr, wt = unit_sales, name = "unit_sales") %>% 
+  mutate(store_nbr = factor(store_nbr))
+
+total_sales %>% 
+  ggplot(aes(x = unit_sales, y = fct_reorder(store_nbr,unit_sales), col = factor(year))) +
+  geom_point() +
+  scale_color_brewer(palette = "Spectral") +
+  scale_x_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
+  labs(x = "Total unit sales (millions)",
+       y = "Store number",
+       title = "Yearly total unit sales",
+       col = "Year")
 ```
 
 
 
-# 
+#### Store toal sales by cluster
+
+```{r}
+total_sales %>% 
+  left_join(stores)
+  ggplot(aes(x = unit_sales, y = fct_reorder(store_nbr,unit_sales), col = factor(year))) +
+  geom_point() +
+  scale_color_brewer(palette = "Spectral") +
+  scale_x_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
+  labs(x = "Total unit sales (millions)",
+       y = "Store number",
+       title = "Yearly total unit sales",
+       col = "Year")

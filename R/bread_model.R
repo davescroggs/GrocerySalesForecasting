@@ -147,10 +147,10 @@ sales_recipe_pay_day <- recipe(unit_sales ~ store_nbr + date + type + cluster +
 
 
 
-xbg_model <- boost_tree(mode = "regression")
+xgb_model <- boost_tree(mode = "regression")
 rf_model <- rand_forest(mode = "regression")
 
-model_trial1_wfs <- workflow_set(models = list(xgb = xbg_model, rf = rf_model),
+model_trial1_wfs <- workflow_set(models = list(xgb = xgb_model, rf = rf_model),
                              preproc = list(simple = sales_recipe_simple,
                                             full = sales_recipe_full,
                                             pay_day = sales_recipe_pay_day),
@@ -188,7 +188,28 @@ model_trial_resamples %>%
 
 # Fit final model
 
-final_fitted_xgb <- last_fit()
+final_fitted_xgb <- workflow(preprocessor = sales_recipe_full,spec = xgb_model) %>% 
+  last_fit(groceries_split,metrics = mset)
+
+final_fitted_xgb %>% 
+  collect_metrics()
 
 ## Variable importance
 
+library(vip)
+
+
+workflow(preprocessor = sales_recipe_full,spec = xgb_model) %>% 
+  fit(data = train) %>% 
+  extract_fit_parsnip() %>% 
+  vip(geom = "point")
+
+
+### RESULTS ### ----
+
+# - XGB run significantly faster (~10 times)
+# - Results were similar
+# - Transactions have the highest importance of all the models but the data set doesn't project into the test set (for obvious reasons)
+
+# Next step, try to model all the BREAD/BAKERY family items together
+# See if hyper-parameter tuning improves results significantly and better differentiates the models.

@@ -33,9 +33,98 @@ holidays <- read_csv(here("data/holidays_events.csv"))
 ```{r}
 tibble(table = c("holidays", "items", "oil", "stores", "test", "train", "transactions"),
        rows = map_int(list(holidays, items, oil, stores, test, train, transactions),nrow),
-       cols = map_int(list(holidays, items, oil, stores, test, train, transactions),ncol)) %>% 
+       cols = map_int(list(holidays, items, oil, stores, test, train, transactions),ncol),
+       `Column names` = map_chr(list(holidays, items, oil, stores, test, train, transactions),~colnames(.x) %>% paste(collapse = ", "))) %>% 
   arrange(-rows) %>% 
   knitr::kable() %>% 
   kableExtra::kable_styling()
 ```
 
+## Test/train
+
+### Dates
+
+- Train dates run from Jan 1 2013 to Aug 15 2017
+- Test runs for the 16 days left in Aug 2017
+- Forecasting is only for 16 days past the last training record
+- All data sets are missing the 359th/360th day which is christmas day. For train, every other day of the year has at least one record, although according to the data description - "The training data does not include rows for items that had zero unit_sales for a store/date combination"
+
+
+
+```{r}
+# Create spans of integers - https://stackoverflow.com/questions/16911773/collapse-runs-of-consecutive-numbers-to-ranges
+findIntRuns <- function(run){
+  rundiff <- c(1, diff(run))
+  difflist <- split(run, cumsum(rundiff!=1))
+  unlist(lapply(difflist, function(x){
+    if(length(x) %in% 1:2) as.character(x) else paste0(x[1], "-", x[length(x)])
+  }), use.names=FALSE)
+}
+
+train %>% 
+  transmute(date, tbl = "train") %>% 
+  bind_rows(test %>% 
+              transmute(date, tbl = "test")) %>% 
+  distinct(date, .keep_all = TRUE) %>% 
+  mutate(day = lubridate::yday(date)) %>% 
+  group_by(year = year(date),tbl) %>% 
+  summarise(n = n(),
+            min = min(date),
+            max = max(date),
+            distinct_days = n_distinct(day),
+            NAs = sum(is.na(day)),
+            missing_days = setdiff(1:366,day) %>% findIntRuns() %>% paste(collapse = ", ")) %>% 
+  arrange(min) %>% 
+  knitr::kable() %>% 
+  kableExtra::kable_styling()
+```
+
+### Stores
+
+ - Some stores have days where their sales are much larger than their median sales
+
+```{r}
+train %>% 
+  group_by(store_nbr) %>% 
+  summarise(qtiles = quantile(unit_sales, probs = seq(0, 1, 0.25), na.rm = FALSE,
+         names = TRUE) %>% list()) %>% 
+  unnest_auto(qtiles) %>% 
+  pivot_longer(cols = -store_nbr) %>%
+  mutate(name = factor(name,
+                            levels = c("0%","25%","50%","75%","100%"),
+                            ordered = T),
+         store_nbr = factor(store_nbr)) %>% 
+  ggplot(aes(x = value, y = fct_reorder(store_nbr,value,max), col = name)) +
+  geom_point() +
+  labs(x = "Unit sales",
+       y = "Store number",
+       title = "Unit sales by quantile",
+       col = "Quantile")
+```
+
+
+
+```{r}
+train %>% 
+  group_by(store_nbr) %>% 
+  summarise(median_sales = median(unit_sales)) %>% 
+  mutate(store_nbr = factor(store_nbr)) %>% 
+  ggplot(aes(x = median_sales, y = fct_reorder(store_nbr,median_sales))) +
+  geom_point() +
+  labs(x = "Unit sales",
+       y = "Store number",
+       title = "Median unit sales",
+       col = "Median")
+```
+
+
+
+```{r}
+train %>% 
+  filter(store_nbr == 1) %>% 
+  mutate(year = year(date)) +
+```
+
+
+
+# 

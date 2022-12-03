@@ -141,14 +141,40 @@ total_sales %>%
 
 #### Store toal sales by cluster
 
+ - Clusters contain between 
+
 ```{r}
-total_sales %>% 
-  left_join(stores)
-  ggplot(aes(x = unit_sales, y = fct_reorder(store_nbr,unit_sales), col = factor(year))) +
+stores %>% 
+  group_by(cluster) %>% 
+  summarise(n = n(),
+            stores_label = paste(store_nbr, collapse = ", ")) %>% 
+  mutate(cluster = factor(cluster)) %>% 
+  ggplot(aes(x = n, y = fct_reorder(cluster, n))) +
+  geom_col(fill = "black") +
+  scale_x_continuous(breaks = 0:10) +
+  geom_text(aes(label = paste("Stores:", stores_label)), hjust = 1.1, col = "white") +
+  labs(x = "# of stores",
+       y = "Cluster",
+       title = "Number of stores contained in each cluster") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+ - It appears as if clusters have a strong total sales relationship
+
+```{r}
+ cluster_total <- train %>% 
+  left_join(stores,
+            by = "store_nbr") %>% 
+  count(cluster = factor(cluster), store_nbr, wt = unit_sales, name = "unit_sales") %>% 
+  mutate(store_nbr = factor(store_nbr))
+
+cluster_total %>% 
+  ggplot(aes(x = unit_sales, y = fct_reorder(cluster,unit_sales))) +
   geom_point() +
   scale_color_brewer(palette = "Spectral") +
   scale_x_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
   labs(x = "Total unit sales (millions)",
-       y = "Store number",
        title = "Yearly total unit sales",
-       col = "Year")
+       y = "Cluster")  +
+  theme(plot.title = element_text(hjust = 0.5))
+```

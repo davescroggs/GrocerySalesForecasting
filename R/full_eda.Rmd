@@ -1,0 +1,41 @@
+---
+title: "Exploratory Data Analysis - "
+output: github_document
+
+knit: (function(inputFile, encoding) {
+      out_dir <- "../markdowns";
+      rmarkdown::render(inputFile,
+                        encoding=encoding,
+                        output_dir=file.path(dirname(inputFile), out_dir))})
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(here)
+
+# Read in data
+train <- read_csv(here("data/train.csv"))
+test <- read_csv(here("data/test.csv")) 
+items <- read_csv(here("data/items.csv")) 
+stores <- read_csv(here("data/stores.csv"))
+transactions <- read_csv(here("data/transactions.csv"))
+oil <- read_csv(here("data/oil.csv"))
+holidays <- read_csv(here("data/holidays_events.csv"))
+```
+
+## Data overview
+
+ - Train has 125 million rows and consumes a large amount of RAM. Will be challenging to visualise and model
+ - All tables only have a few columns, meaning feature engineering should be a shorter process
+ - 4100 sale items
+
+```{r}
+tibble(table = c("holidays", "items", "oil", "stores", "test", "train", "transactions"),
+       rows = map_int(list(holidays, items, oil, stores, test, train, transactions),nrow),
+       cols = map_int(list(holidays, items, oil, stores, test, train, transactions),ncol)) %>% 
+  arrange(-rows) %>% 
+  knitr::kable() %>% 
+  kableExtra::kable_styling()
+```
+

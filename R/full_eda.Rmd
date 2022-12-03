@@ -79,6 +79,25 @@ train %>%
   kableExtra::kable_styling()
 ```
 
+
+```{r}
+train %>% 
+  arrange(store_nbr, date) %>% 
+  mutate(dow = lubridate::wday(date, label = TRUE)) %>% 
+  group_by(store_nbr, dow) %>% 
+  summarise(unit_sales_total = sum(unit_sales),
+            n = n(),
+            .groups = "drop") %>% 
+  mutate(store_nbr = factor(store_nbr),
+         store_nbr = fct_reorder(store_nbr, unit_sales_total, sum)) %>% 
+  ggplot(aes(x = unit_sales_total, y = store_nbr, col = dow)) + 
+  geom_point() +
+  ggrepel::geom_label_repel(data = ~group_by(., dow) %>% sample_n(size = 1),
+                            aes(label = dow),
+                            min.segment.length = 0,nudge_x = -5000)
+```
+
+
 ### Stores
 
  - Some stores have days where their sales are much larger than their median sales
@@ -178,3 +197,109 @@ cluster_total %>%
        y = "Cluster")  +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+
+
+
+### Items
+
+#### Which items are in the most/least number of stores
+
+- Show if the store has ever sold each item, counted by family
+
+```{r}
+train %>% 
+  distinct(store_nbr, item_nbr) %>% 
+  left_join(items)
+
+t <- .Last.value
+
+t %>% 
+  count(family) %>% 
+  mutate(type = "Store totals") %>% 
+  bind_rows(items %>% 
+  count(family) %>% 
+    mutate(type = "Item totals")) %>% 
+  ggplot(aes(x = n, y = fct_reorder(family, n))) +
+  geom_col() +
+  labs(x = "# of items",
+       title = "The number of items in each family",
+       y = "Family")  +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  facet_grid(.~type, scales = "free_x")
+```
+
+#### Perishable
+
+- 25% of items are perishable
+
+```{r}
+items %>% 
+  count(perishable) %>% 
+  mutate(pct = scales::percent(n/sum(n))) %>% 
+  knitr::kable() %>% 
+  kableExtra::kable_styling()
+```
+
+## Promotions
+
+```{r}
+train %>% 
+  left_join(stores, by = "store_nbr") %>% 
+  group_by(store_nbr, type, onpromotion) %>% 
+  summarise(median_units = median(unit_sales),
+            .groups = "drop") %>% 
+  mutate(onpromotion = case_when(
+    onpromotion ~ "Promotoion",
+    !onpromotion ~ "Standard",
+    is.na(onpromotion) ~ "Missing",
+    TRUE ~ "Err")) %>% 
+  pivot_wider(names_from = onpromotion, values_from = median_units) %>% 
+  pivot_longer(cols = c(Promotoion, Missing)) %>% 
+  mutate(difference = value - Standard,
+         store_nbr = fct_reorder(factor(store_nbr), difference, sum)) %>% 
+  ggplot(aes(x = difference, y = store_nbr, col = name)) +
+  geom_point() +
+  geom_vline(xintercept = 0) +
+  facet_grid(type~., scales = "free_y")
+```
+
+### Holidays
+
+```{r}
+holidays %>% 
+  mutate(locale_extra = if_else(locale == "Local", locale_name,locale)) %>% 
+  ggplot(aes(x = yday(date), y = locale_extra,col = factor(year(date)))) +
+  geom_point() +
+  scale_color_brewer(palette = 2) + 
+  labs(x = "Day of the year (1-366)",
+       y = "Locale",
+       col = "Year",
+       title = "Timing of holidays") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+#### Joining holidays to data set
+
+ - There's no common named key to join the holidays by locale
+
+```{r}
+holidays %>%
+  mutate(tbl = "h") %>% 
+  full_join(stores %>% mutate(tbl = "s"),
+            by = c("locale_name" = "city")) %>% 
+  count(tbl.x, tbl.y)
+```
+
+### Pay day
+From the Kaggle comp - "Wages in the public sector are paid every two weeks on the 15 th and on the last day of the month. Supermarket sales could be affected by this."
+
+- Appears that this has a minor effect on the total sales, when looking at all sales. The effect might be different in different item types.
+
+```{r}
+train %>% 
+  mutate(pay_day = if_else(date == ceiling_date(date, "month") - days(1) | day(date) == 15,1,0)) %>%
+  count(date, pay_day, wt = unit_sales) %>% 
+  ggplot(aes(x = wday(date,label = T), y = n, col = factor(pay_day))) +
+  geom_boxplot()
+```
+

@@ -28,7 +28,7 @@ Competition is to forecast item sales in:
 Competition model data is 7 tables, test/train containing the predictor variable and 5 other tables containing additional information.
 
 | Table        |        Rows | Cols | Column names                                              |
-|:----------------|----------------:|----------------:|:--------------------|
+|:-----------------|-----------------:|-----------------:|:-------------------|
 | train        | 125,497,040 |    6 | id, date, store_nbr, item_nbr, unit_sales, onpromotion    |
 | test         |   3,370,464 |    5 | id, date, store_nbr, item_nbr, onpromotion                |
 | transactions |      83,488 |    3 | date, store_nbr, transactions                             |
@@ -38,8 +38,6 @@ Competition model data is 7 tables, test/train containing the predictor variable
 | stores       |          54 |    5 | store_nbr, city, state, type, cluster                     |
 
 ::: {tbl-colwidths="auto"}
-
-## EDA results
 
 ## Evaluation metric
 
@@ -94,11 +92,9 @@ Final model - Tuned XGBoost
 
 -   Features modelled - item number, store number, temporal information (weekday, month, year), store type, store cluster, location (state)
 -   hyper-parameters tuned: tree depth, min data points in a node, randomly sampled predictors
--   Model evaluation: nwrmsle = 0.696
-    -   Typical kaggle results \~ 0.50-0.53
-    -   This item family might be difficult (or easy) to forecast
+-   Model evaluation: nwrmsle = 0.696 (good kaggle results \~ 0.50-0.53)
 
-![Feature importance](../figures/final_model_feature_importance.jpeg)
+![Feature importance](../figures/final_model_feature_importance.jpeg){fig-align="center" width="201"}
 
 ## Residuals
 
@@ -116,7 +112,7 @@ Final model - Tuned XGBoost
     -   Only stores in Quito city, and Type C
     -   Both dummy features had high importance
 
-![Extreme residuals](../figures/extreme_residuals.jpeg)
+![Extreme residuals](../figures/extreme_residuals.jpeg){width="319"}
 
 ## Limitations
 
@@ -142,5 +138,3 @@ Final model - Tuned XGBoost
     -   Work required to develop an approach to estimating these events
 -   Corporación Favorita work in 2 week horizons
     -   Regular model retraining (daily)
-    
-

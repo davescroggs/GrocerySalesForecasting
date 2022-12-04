@@ -5,11 +5,15 @@ Corporación Favorita has challenged the Kaggle community to build a model that 
 ## Contents
 
 ### Data analysis
--   [Training data EDA](markdowns/full_eda.md)
--   [Single bakery item EDA](markdowns/bread_eda.md)
+-   [Training data EDA](R/full_eda.md)
+-   [Single bakery item EDA](R/bread_eda.md)
 
 ### Modelling
 
 -   [First simple model](R/bread_model.R)
 -   [Item family model](R/bakery_model.R)
 -   [Metric function](R/metric_sets.R)
+
+### Presentation
+
+-   [Model presentation](presentation/presentation.pdf)

@@ -28,7 +28,7 @@ Competition is to forecast item sales in:
 Competition model data is 7 tables, test/train containing the predictor variable and 5 other tables containing additional information.
 
 | Table        |        Rows | Cols | Column names                                              |
-|:-----------------|-----------------:|-----------------:|:-------------------|
+|:-----------------|-----------------:|-----------------:|:------------------|
 | train        | 125,497,040 |    6 | id, date, store_nbr, item_nbr, unit_sales, onpromotion    |
 | test         |   3,370,464 |    5 | id, date, store_nbr, item_nbr, onpromotion                |
 | transactions |      83,488 |    3 | date, store_nbr, transactions                             |

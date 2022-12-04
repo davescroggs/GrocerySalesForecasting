@@ -2,6 +2,8 @@
 
 Corporación Favorita has challenged the Kaggle community to build a model that more accurately forecasts product sales. This repo contains an attempt at modelling a small number of items using the tidymodels framework. The table of contents below links to the modelling files.
 
+The Kaggle competition can be found [here](https://www.kaggle.com/competitions/favorita-grocery-sales-forecasting/overview/description). This repo does not contain the data for the competition, which can be downloaded from the competition site and unzipped into the data folder in order to run the model scripts.
+
 ## Contents
 
 ### Data analysis

@@ -1,4 +1,4 @@
-# GrocerySalesForecasting
+# Grocery Sales Forecasting
 
 Corporación Favorita has challenged the Kaggle community to build a model that more accurately forecasts product sales. This repo contains an attempt at modelling a small number of items using the tidymodels framework. The table of contents below links to the modelling files.
 

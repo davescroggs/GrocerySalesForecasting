@@ -11,7 +11,7 @@ editor: visual
 
 Accurate forecasting of product sales is important to retail stores, as stated in the competition description:
 
-> *Predict a little over, and grocers are stuck with overstocked, perishable goods. Guess a little under, and popular items quickly sell out, leaving money on the table and customers fuming.*
+> "*Predict a little over, and grocers are stuck with overstocked, perishable goods. Guess a little under, and popular items quickly sell out, leaving money on the table and customers fuming.*"
 
 Competition is to forecast item sales in:
 
@@ -27,21 +27,23 @@ Competition is to forecast item sales in:
 
 Competition model data is 7 tables, test/train containing the predictor variable and 5 other tables containing additional information.
 
-| Table        |      Rows | Columns | Column names                                              |
-|:-----------------|-----------------:|-----------------:|:------------------|
-| train        | 125497040 |       6 | id, date, store_nbr, item_nbr, unit_sales, onpromotion    |
-| test         |   3370464 |       5 | id, date, store_nbr, item_nbr, onpromotion                |
-| transactions |     83488 |       3 | date, store_nbr, transactions                             |
-| items        |      4100 |       4 | item_nbr, family, class, perishable                       |
-| oil          |      1218 |       2 | date, dcoilwtico                                          |
-| holidays     |       350 |       6 | date, type, locale, locale_name, description, transferred |
-| stores       |        54 |       5 | store_nbr, city, state, type, cluster                     |
+| Table        |        Rows | Cols | Column names                                              |
+|:----------------|----------------:|----------------:|:----------------------|
+| train        | 125,497,040 |    6 | id, date, store_nbr, item_nbr, unit_sales, onpromotion    |
+| test         |   3,370,464 |    5 | id, date, store_nbr, item_nbr, onpromotion                |
+| transactions |      83,488 |    3 | date, store_nbr, transactions                             |
+| items        |       4,100 |    4 | item_nbr, family, class, perishable                       |
+| oil          |       1,218 |    2 | date, dcoilwtico                                          |
+| holidays     |         350 |    6 | date, type, locale, locale_name, description, transferred |
+| stores       |          54 |    5 | store_nbr, city, state, type, cluster                     |
+
+::: {tbl-colwidths="auto"}
 
 ## Evaluation metric
 
-Normalized Weighted Root Mean Squared Logarithmic Error (NWRMSLE) is the evaluation metric
+Normalized Weighted Root Mean Squared Logarithmic Error (NWRMSLE)
 
--   Wieght (wi) are for perishible items (weight = 1.5), other items weight = 1
+-   Weight (wi) are for perishable items (weight = 1.5), other items weight = 1
 
 -   Metric accounts for predicting results of a varying order of magnitude
 
@@ -49,11 +51,39 @@ $$ NWRMSLE = \sqrt{ \frac{\sum_{i=1}^{n} w_i \left( \ln(\hat{y}_i + 1) - \ln(y_i
 
 ## Model approach
 
-1.   EDA
+1.  Exploration of the training and auxiliary data sets
 
-2.  Simple model
+    + Explore the predictor variable
 
-3. 
+    + Explore the predictor relationship with other variables
+
+2.  Build a simple model on one item
+
+    -   Trial model algorithms
+
+    -   Trial data pre-processing
+
+    -   Test evaluation metric
+
+    -   Feature engineering
+
+    -   Model evaluation
+
+3.  Expand simple model
+
+    + Model family of items (bread/bakery)
+
+    + Expand model features
+
+    + Tune hyper-parameters
+
+    + Detailed model evaluation
+
+## Process
+
+    - Early EDA memory limit issues
+    - Proof of concept model
+    + Predictor 
 
 ## Results
 
@@ -85,8 +115,6 @@ Final model - Tuned XGBoost
 
 ## Limitations
 
-
 ## Future work
 
 ## Production deployment considerations
-

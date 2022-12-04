@@ -17,9 +17,17 @@ editor: visual
 
 ## Data
 
-```{r}
 
-```
+
+| Table        |      Rows | Columns | Column names                                              |
+|:----------|----------:|----------:|:-------------------------------------|
+| train        | 125497040 |       6 | id, date, store_nbr, item_nbr, unit_sales, onpromotion    |
+| test         |   3370464 |       5 | id, date, store_nbr, item_nbr, onpromotion                |
+| transactions |     83488 |       3 | date, store_nbr, transactions                             |
+| items        |      4100 |       4 | item_nbr, family, class, perishable                       |
+| oil          |      1218 |       2 | date, dcoilwtico                                          |
+| holidays     |       350 |       6 | date, type, locale, locale_name, description, transferred |
+| stores       |        54 |       5 | store_nbr, city, state, type, cluster                     |
 
 ## Evaluation metric
 
@@ -51,3 +59,6 @@ Final model - Tuned XGBoost
     -   Only stores in Quito city, and Type C
     -   Both dummy features had high importance
 
+![Extreme residuals](../figures/extreme_residuals.jpeg)
+
+Stop

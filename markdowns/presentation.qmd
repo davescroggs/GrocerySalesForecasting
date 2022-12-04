@@ -9,19 +9,36 @@ editor: visual
 
 ## Introduction
 
-Quarto enables you to weave together content and executable code into a finished presentation. To learn more about Quarto presentations see <https://quarto.org/docs/presentations/>.
+-   Competition is to forecast item sales in 54 different grocery stores.
 
-## Bullets
+    -   4,100 sale items
+    -   4.5 years, 125 million rows of training data
+    -   Forecast period of 2 weeks past final training data
 
-When you click the **Render** button a document will be generated that includes:
-
--   Content authored with markdown
--   Output from executable code
-
-## Code
-
-When you click the **Render** button a presentation will be generated that includes both content and the output of embedded code. You can embed code like this:
+## Data
 
 ```{r}
-1 + 1
+
 ```
+
+## Evaluation metric
+
+## Models
+
+## Results
+
+Final model - Tuned XGBoost
+
+-   Features modelled - item number, store number, temporal information (weekday, month, year), store type, store cluster, location (state)
+-   hyper-parameters tuned: tree depth, min data points in a node, randomly sampled predictors
+-   Model evaluation: nwrmsle = 0.696
+
+![Feature importance](../figures/final_model_feature_importance.jpeg){width="456"}
+
+## Residuals
+
+::: {layout-ncol=2}
+![Residuals](../figures/final_model_residuals.jpeg)
+![Extreme residuals](../figures/large_residuals.jpeg)
+
+:::

@@ -19,16 +19,18 @@ Competition is to forecast item sales in:
 
 -   4,100 sale items
 
--   4.5 years, 125 million rows of training data
+-   4.5 years and 125 million rows of training data
 
 -   Forecast period of 2 weeks past final training data
+
+Teams given 3 months to produce their best result, uploaded via Kaggle
 
 ## Data
 
 Competition model data is 7 tables, test/train containing the predictor variable and 5 other tables containing additional information.
 
 | Table        |        Rows | Cols | Column names                                              |
-|:-----------------|-----------------:|-----------------:|:------------------|
+|:---------|-----:|----:|:-----------------------------|
 | train        | 125,497,040 |    6 | id, date, store_nbr, item_nbr, unit_sales, onpromotion    |
 | test         |   3,370,464 |    5 | id, date, store_nbr, item_nbr, onpromotion                |
 | transactions |      83,488 |    3 | date, store_nbr, transactions                             |
@@ -37,7 +39,6 @@ Competition model data is 7 tables, test/train containing the predictor variable
 | holidays     |         350 |    6 | date, type, locale, locale_name, description, transferred |
 | stores       |          54 |    5 | store_nbr, city, state, type, cluster                     |
 
-::: {tbl-colwidths="auto"}
 
 ## Evaluation metric
 
@@ -79,22 +80,76 @@ $$ NWRMSLE = \sqrt{ \frac{\sum_{i=1}^{n} w_i \left( \ln(\hat{y}_i + 1) - \ln(y_i
 
     -   Detailed model evaluation
 
-## Process
+## Exploratory Data Analysis
 
-    - Early EDA memory limit issues
-    - Proof of concept model
-    - Model fit times were long for the simple model
-    + Predictor 
+Results
+  
+-   Clear day-of-week trends (autocorrelation)
+-   Significant range in store sales (1-15 million units/year)
+-   Item family types
+    - A few types had a large proportion of all items
 
-## Results
+Issues
+  
+-   Early EDA memory limit issues
+-   Number and range of unit sales made visualisation challenging
 
-Final model - Tuned XGBoost
 
--   Features modelled - item number, store number, temporal information (weekday, month, year), store type, store cluster, location (state)
--   hyper-parameters tuned: tree depth, min data points in a node, randomly sampled predictors
+## First simple model
+
+-   A single common bread/bakery item
+-   83,500 rows of data
+
+Results
+  
+-   Trialled 3 model recipes
+    - Recipe 1: store number and temporal data
+    - Recipe 2: store information (number, location, type, cluster and daily transactions) and temporal data
+    - Recipe 3: As above and includes pay-day information
+-   Trialled 2 model algorithms
+    - Random forest
+    - XGBoost
+-   Model algorithms had similar accuracy
+-   Recipe 2 had best accuracy
+
+Issues
+  
+-   Random forest model fit times were long for the simple model
+
+## First model results
+
+|Recipe   |model       |.metric |      mean|  n|
+|:--------|:-----------|:-------|---------:|--:|
+|Recipe 1 |boost_tree  |rmsle   | 0.3808435|  5|
+|Recipe 1 |rand_forest |rmsle   | 0.5025597|  5|
+|Recipe 2 |boost_tree  |rmsle   | 0.3148345|  5|
+|Recipe 2 |rand_forest |rmsle   | 0.3095069|  5|
+|Recipe 3 |boost_tree  |rmsle   | 0.3150564|  5|
+|Recipe 3 |rand_forest |rmsle   | 0.3092414|  5|
+
+## Bakery/bread family model
+
+-   A model fitting the bread/bakery item family
+
+Results
+  
+-   XGBoost model and Full recipe from simple model used
+-   Hyper-parameters tuned: tree depth, min data points in a node, randomly sampled predictors
 -   Model evaluation: nwrmsle = 0.696 (good kaggle results \~ 0.50-0.53)
 
 ![Feature importance](../figures/final_model_feature_importance.jpeg){fig-align="center" width="201"}
+
+## Hyper-parameter tuning results
+
+
+| mtry| min_n| tree_depth| trees| learn_rate|.metric |     mean|  n|
+|----:|-----:|--------:|-----:|-------:|:-----|-----:|--:|
+|   13|     2|          8|  1000|       0.02|rmse    | 8.672|  4|
+|   13|    21|         15|  1000|       0.02|rmse    | 8.692|  4|
+|   13|    21|          8|  1000|       0.02|rmse    | 8.795|  4|
+|   13|    40|         15|  1000|       0.02|rmse    | 8.820|  4|
+
+Note: Metric is rmse
 
 ## Residuals
 
@@ -116,11 +171,14 @@ Final model - Tuned XGBoost
 
 ## Limitations
 
--   Large data set meant:
-    -   detailed EDA was difficult
-    -   modelling times were long
+-   Detailed EDA was difficult due to:
+    a) size of dataset
+    b) diversity of product items
+    c) time constraints
+-   Model parameter (feature and hyper parameters) exploration limited
 -   Holiday data detailed and complex (holiday transfers)
--   Bakery/bread family didn't have new items - issue not accounted for
+-   Items modelled were common - no new items/stores in test set
+    - Method required for full data set
 
 ## Improvements/Future work
 
@@ -131,10 +189,14 @@ Final model - Tuned XGBoost
 -   Further EDA on other item families
 -   Further model hyper-parameter tuning
 -   EDA of effect of oil price, promotions, and re-investigate pay-day impact
+-   Investigate ARIMA model for temporal effects
 
 ## Production deployment considerations
 
 -   New items/stores without history need coding
     -   Work required to develop an approach to estimating these events
 -   Corporación Favorita work in 2 week horizons
-    -   Regular model retraining (daily)
+    -   Regular model retraining (daily/weekly)
+    -   Develop item forecast performance metric
+        -   Continuous monitoring of results
+    -   Monitor and log large model errors (new holidays)

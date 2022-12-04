@@ -6,6 +6,7 @@ library(here)
 library(tidymodels)
 library(xgboost)
 library(ranger)
+library(patchwork)
 
 
 # Read in data ------------------------------------------------------------
@@ -116,7 +117,7 @@ xgb_grid <-
   levels = 3
 )
 
-
+# Create a small training set to speed up evaluation
 cv_small <- train %>% 
   group_by(item_nbr,wday = wday(date),store_nbr) %>% 
   sample_frac(0.005) %>% 
@@ -129,7 +130,7 @@ set.seed(345)
 # Use rmse as metric so parallel processing is possible
 doParallel::registerDoParallel(core = 4)
 
-
+# Concept from here - https://juliasilge.com/blog/baseball-racing/
 xgb_rs <- tune_race_anova(
   xgb_wf_tune,
   resamples = cv_small,
@@ -173,24 +174,97 @@ xgb_last %>%
 
 # Residuals ---------------------------------------------------------------
 
+final_model_residuals <- xgb_last %>%
+  select(.predictions) %>% 
+  unnest(.predictions) %>% 
+  mutate(residual_rank = abs(.pred - unit_sales) %>% percent_rank()) %>% 
+  bind_cols(test %>% select(date, item_nbr, store_nbr)) %>% 
+  left_join(holidays_events, by = "date")
+  
+
 # Most of the predictions are underestimating the true result
 # It looks like there's lot
 
-xgb_last %>%
-  select(.predictions) %>% 
-  unnest(.predictions) %>% 
-  mutate(residual = abs(.pred - unit_sales) %>% percent_rank()) %>% 
-  filter(residual > 0.999) %>% 
-  left_join(train %>% transmute(.row = 1:n(), date)) %>% 
-  left_join(holidays_events, by = "date") %>% 
-  ggplot(aes(unit_sales, .pred, col = type)) +
+final_model_residuals %>% 
+  ggplot(aes(unit_sales, .pred)) +
   geom_abline(color = "gray80", size = 1) +
-  geom_point(alpha = 0.5) +
+  geom_point(alpha = 0.1) +
+  coord_equal(xlim = c(0,350), ylim = c(0,350)) +
   labs(
+    title = "Model residuals",
     x = "Truth",
     y = "Predicted unit sales",
     color = NULL
-  )
+  ) + 
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Band of results are poorly estimated (predicted sales > 100)
+
+final_model_residuals %>% 
+  filter(.pred > 100) %>% 
+  count(store_nbr)
+
+# Stores 44 and 49 are poorly estimated - future work
+
+## Largest residuals ----
+
+p1 <- final_model_residuals %>% 
+  filter(residual_rank > 0.99) %>% 
+  mutate(type = if_else(is.na(type), "No holiday", type),
+         type = factor(type,
+                       levels = c("No holiday", "Additional", "Bridge", "Event", "Holiday", "Transfer", "Work Day"),
+                       ordered = T)) %>% 
+  ggplot(aes(unit_sales, .pred, col = type)) +
+  geom_abline(color = "black", size = 1) +
+  geom_point(alpha = 0.5) +
+  scale_colour_manual(values = c("grey80", "#FDE725FF", "#8FD744FF", "#21908CFF", "#35B779FF", "#440154FF", "#31688EFF")) +
+  labs(
+    subtitle = "Holidays",
+    x = "Truth",
+    y = "Predicted unit sales",
+    color = "Holiday type"
+  ) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+p2 <- 
+  final_model_residuals %>%
+  filter(residual_rank > 0.99) %>% 
+  mutate(store_nbr = fct_lump(factor(store_nbr), n = 10)) %>% 
+  ggplot(aes(unit_sales, .pred, col = store_nbr)) +
+  geom_abline(color = "black", size = 1) +
+  geom_point(alpha = 0.5) +
+  labs(
+    subtitle = "Store",
+    x = "Truth",
+    y = "Predicted unit sales",
+    color = "Store ID"
+  ) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+p1 + p2 & 
+  plot_annotation(title = "Extreme residuals",
+                  subtitle = "Top 1% largest residuals, coloured by holiday and store",
+                  theme = theme(plot.title = element_text(hjust = 0.5),
+                                plot.subtitle = element_text(hjust = 0.5)))
+
+# Variable importance -----------------------------------------------------
+
+model_fit <- xgb_wf %>%
+  finalize_workflow(select_best(xgb_rs, "rmse")) %>% 
+  fit(data = train)
+  
+model_fit %>% 
+  extract_fit_parsnip() %>% 
+  vip::vip(geom = "point") + 
+  labs(x = "Feature",
+       title = "Model feature importance") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
 
 
 # Final results - NWRMSLE -------------------------------------------------

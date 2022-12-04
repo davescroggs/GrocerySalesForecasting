@@ -2,25 +2,33 @@
 title: "Corporación Favorita Grocery Sales Forecasting"
 subtitle: "A casestudy in modelling grocery sales in Ecuadorian supermarkets"
 author: "David Scroggs"
-date: "4-12/2022"
+date: "4-12-2022"
 format: beamer
 editor: visual
 ---
 
 ## Introduction
 
--   Competition is to forecast item sales in 54 different grocery stores.
+Accurate forecasting of product sales is important to retail stores, as stated in the competition description:
 
-    -   4,100 sale items
-    -   4.5 years, 125 million rows of training data
-    -   Forecast period of 2 weeks past final training data
+> *Predict a little over, and grocers are stuck with overstocked, perishable goods. Guess a little under, and popular items quickly sell out, leaving money on the table and customers fuming.*
+
+Competition is to forecast item sales in:
+
+-   54 different grocery stores in 22 cities
+
+-   4,100 sale items
+
+-   4.5 years, 125 million rows of training data
+
+-   Forecast period of 2 weeks past final training data
 
 ## Data
 
 Competition model data is 7 tables, test/train containing the predictor variable and 5 other tables containing additional information.
 
 | Table        |      Rows | Columns | Column names                                              |
-|:----------|----------:|----------:|:-------------------------------------|
+|:-----------------|-----------------:|-----------------:|:------------------|
 | train        | 125497040 |       6 | id, date, store_nbr, item_nbr, unit_sales, onpromotion    |
 | test         |   3370464 |       5 | id, date, store_nbr, item_nbr, onpromotion                |
 | transactions |     83488 |       3 | date, store_nbr, transactions                             |
@@ -32,13 +40,20 @@ Competition model data is 7 tables, test/train containing the predictor variable
 ## Evaluation metric
 
 Normalized Weighted Root Mean Squared Logarithmic Error (NWRMSLE) is the evaluation metric
-  - Wieghts are for perishible items (weight = 1.5), other items weight = 1
-  - Metric accounts for predicting results of a varying order of magnitude
+
+-   Wieght (wi) are for perishible items (weight = 1.5), other items weight = 1
+
+-   Metric accounts for predicting results of a varying order of magnitude
 
 $$ NWRMSLE = \sqrt{ \frac{\sum_{i=1}^{n} w_i \left( \ln(\hat{y}_i + 1) - \ln(y_i +1)  \right)^2  }{\sum_{i=1}^{n} w_i}} $$
 
-## Models
+## Model approach
 
+1.   EDA
+
+2.  Simple model
+
+3. 
 
 ## Results
 
@@ -67,3 +82,11 @@ Final model - Tuned XGBoost
     -   Both dummy features had high importance
 
 ![Extreme residuals](../figures/extreme_residuals.jpeg)
+
+## Limitations
+
+
+## Future work
+
+## Production deployment considerations
+

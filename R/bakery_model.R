@@ -51,8 +51,7 @@ sales_recipe_full <- recipe(unit_sales ~ item_nbr + store_nbr + date + type + cl
   step_dummy(all_nominal_predictors()) 
 
 sales_recipe_full %>% 
-  prep_juice() %>% 
-  filter(unit_sales == 0)
+  prep_juice()
 
 
 ## Model specification -----------------------------------------------------
@@ -193,3 +192,16 @@ xgb_last %>%
     color = NULL
   )
 
+
+# Final results - NWRMSLE -------------------------------------------------
+
+
+xgb_last %>% 
+  select(.predictions) %>% 
+  unnest(.predictions) %>% 
+  bind_cols(test %>% select(item_nbr)) %>% 
+  left_join(items %>% 
+              mutate(weight = perishable * 1.5)) %>% 
+  summarise(nwrmsle = nwrmsle_vec(unit_sales, .pred, weight))
+
+# nwrmsle = 0.696

@@ -146,15 +146,16 @@ xgb_rs %>%
 # Best result -------------------------------------------------------------
 
 xgb_rs %>% 
-  show_best()
+  show_best() %>% 
+  mutate(trees = 1000, learn_rate = 0.02,.before = .metric) %>% 
+  knitr::kable(format = "markdown")
 
-# A tibble: 4 × 9
-# mtry min_n tree_depth .metric .estimator  mean     n std_err .config              
-# <int> <int>      <int> <chr>   <chr>      <dbl> <int>   <dbl> <chr>                
-#   1    13     2          8 rmse    standard    8.67     4   0.177 Preprocessor1_Model20
-# 2    13    21         15 rmse    standard    8.69     4   0.169 Preprocessor1_Model24
-# 3    13    21          8 rmse    standard    8.80     4   0.202 Preprocessor1_Model23
-# 4    13    40         15 rmse    standard    8.82     4   0.171 Preprocessor1_Model27
+# | mtry| min_n| tree_depth| trees| learn_rate|.metric |.estimator |     mean|  n|   std_err|.config               |
+#   |----:|-----:|----------:|-----:|----------:|:-------|:----------|--------:|--:|---------:|:---------------------|
+#   |   13|     2|          8|  1000|       0.02|rmse    |standard   | 8.672183|  4| 0.1773355|Preprocessor1_Model20 |
+#   |   13|    21|         15|  1000|       0.02|rmse    |standard   | 8.692642|  4| 0.1686215|Preprocessor1_Model24 |
+#   |   13|    21|          8|  1000|       0.02|rmse    |standard   | 8.795326|  4| 0.2019732|Preprocessor1_Model23 |
+#   |   13|    40|         15|  1000|       0.02|rmse    |standard   | 8.820370|  4| 0.1709089|Preprocessor1_Model27 |
 
 # Finalise model ----------------------------------------------------------
 

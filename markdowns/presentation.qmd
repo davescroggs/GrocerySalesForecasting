@@ -1,5 +1,8 @@
 ---
 title: "Corporación Favorita Grocery Sales Forecasting"
+subtitle: "A casestudy in modelling grocery sales in Ecuadorian supermarkets"
+author: "David Scroggs"
+date: "4-12/2022"
 format: beamer
 editor: visual
 ---

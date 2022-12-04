@@ -10,24 +10,28 @@ library(ranger)
 
 # Read in data ------------------------------------------------------------
 
+# Select on the bread/bakery family
 items <- read_csv(here("data/items.csv")) %>% 
   filter(family == "BREAD/BAKERY")
 stores <- read_csv(here("data/stores.csv"))
 holidays_events <- read_csv(here("data/holidays_events.csv"))
 
+full_data <- read_csv(here("data/train.csv"))
+
 # Create test/train split
 groceries_split <- 
-  read_csv(here("data/train.csv")) %>%  
+  full_data %>%  
   # Join item information - family, class, perishable
   inner_join(items, by = "item_nbr") %>% 
   # Join store information - city, state, type, cluster
   left_join(stores, by = "store_nbr") %>% 
-  initial_split(prop = 0.9, strata = store_nbr)
+  # Split with items as strata
+  initial_split(prop = 0.9, strata = item_nbr)
 
 train <- training(groceries_split)
 test <- testing(groceries_split)
 
-sales_cv <- rsample::vfold_cv(train, v = 10, strata = store_nbr)
+sales_cv <- rsample::vfold_cv(train, v = 5, strata = item_nbr)
 
 
 ## Pre-processing & feature selection --------------------------------------
@@ -36,7 +40,7 @@ prep_juice <- function(x) juice(prep(x))
 
 # Feature engineering - trial multiple recipes ----------------------------
 
-sales_recipe_full <- recipe(unit_sales ~ store_nbr + date + type + cluster + 
+sales_recipe_full <- recipe(unit_sales ~ item_nbr + store_nbr + date + type + cluster + 
                               state + id,
                             data = train) %>% 
   update_role(id, new_role = "id") %>% 
@@ -47,7 +51,8 @@ sales_recipe_full <- recipe(unit_sales ~ store_nbr + date + type + cluster +
   step_dummy(all_nominal_predictors()) 
 
 sales_recipe_full %>% 
-  prep_juice()
+  prep_juice() %>% 
+  filter(unit_sales == 0)
 
 
 ## Model specification -----------------------------------------------------

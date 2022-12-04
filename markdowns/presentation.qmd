@@ -17,7 +17,7 @@ editor: visual
 
 ## Data
 
-
+Competition model data is 7 tables, test/train containing the predictor variable and 5 other tables containing additional information.
 
 | Table        |      Rows | Columns | Column names                                              |
 |:----------|----------:|----------:|:-------------------------------------|
@@ -31,7 +31,14 @@ editor: visual
 
 ## Evaluation metric
 
+Normalized Weighted Root Mean Squared Logarithmic Error (NWRMSLE) is the evaluation metric
+  - Wieghts are for perishible items (weight = 1.5), other items weight = 1
+  - Metric accounts for predicting results of a varying order of magnitude
+
+$$ NWRMSLE = \sqrt{ \frac{\sum_{i=1}^{n} w_i \left( \ln(\hat{y}_i + 1) - \ln(y_i +1)  \right)^2  }{\sum_{i=1}^{n} w_i}} $$
+
 ## Models
+
 
 ## Results
 
@@ -60,5 +67,3 @@ Final model - Tuned XGBoost
     -   Both dummy features had high importance
 
 ![Extreme residuals](../figures/extreme_residuals.jpeg)
-
-Stop

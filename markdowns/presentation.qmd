@@ -28,7 +28,7 @@ Competition is to forecast item sales in:
 Competition model data is 7 tables, test/train containing the predictor variable and 5 other tables containing additional information.
 
 | Table        |        Rows | Cols | Column names                                              |
-|:----------------|----------------:|----------------:|:----------------------|
+|:----------------|----------------:|----------------:|:--------------------|
 | train        | 125,497,040 |    6 | id, date, store_nbr, item_nbr, unit_sales, onpromotion    |
 | test         |   3,370,464 |    5 | id, date, store_nbr, item_nbr, onpromotion                |
 | transactions |      83,488 |    3 | date, store_nbr, transactions                             |
@@ -38,6 +38,8 @@ Competition model data is 7 tables, test/train containing the predictor variable
 | stores       |          54 |    5 | store_nbr, city, state, type, cluster                     |
 
 ::: {tbl-colwidths="auto"}
+
+## EDA results
 
 ## Evaluation metric
 
@@ -53,9 +55,9 @@ $$ NWRMSLE = \sqrt{ \frac{\sum_{i=1}^{n} w_i \left( \ln(\hat{y}_i + 1) - \ln(y_i
 
 1.  Exploration of the training and auxiliary data sets
 
-    + Explore the predictor variable
+    -   Explore the predictor variable
 
-    + Explore the predictor relationship with other variables
+    -   Explore the predictor relationship with other variables
 
 2.  Build a simple model on one item
 
@@ -71,18 +73,19 @@ $$ NWRMSLE = \sqrt{ \frac{\sum_{i=1}^{n} w_i \left( \ln(\hat{y}_i + 1) - \ln(y_i
 
 3.  Expand simple model
 
-    + Model family of items (bread/bakery)
+    -   Model family of items (bread/bakery)
 
-    + Expand model features
+    -   Expand model features
 
-    + Tune hyper-parameters
+    -   Tune hyper-parameters
 
-    + Detailed model evaluation
+    -   Detailed model evaluation
 
 ## Process
 
     - Early EDA memory limit issues
     - Proof of concept model
+    - Model fit times were long for the simple model
     + Predictor 
 
 ## Results
@@ -92,6 +95,8 @@ Final model - Tuned XGBoost
 -   Features modelled - item number, store number, temporal information (weekday, month, year), store type, store cluster, location (state)
 -   hyper-parameters tuned: tree depth, min data points in a node, randomly sampled predictors
 -   Model evaluation: nwrmsle = 0.696
+    -   Typical kaggle results \~ 0.50-0.53
+    -   This item family might be difficult (or easy) to forecast
 
 ![Feature importance](../figures/final_model_feature_importance.jpeg)
 
@@ -115,6 +120,27 @@ Final model - Tuned XGBoost
 
 ## Limitations
 
-## Future work
+-   Large data set meant:
+    -   detailed EDA was difficult
+    -   modelling times were long
+-   Holiday data detailed and complex (holiday transfers)
+-   Bakery/bread family didn't have new items - issue not accounted for
+
+## Improvements/Future work
+
+-   Explore poor prediction performance of stores 42, 49
+-   Explore further feature engineering of bakery family model
+    -   Holiday information
+    -   Regional information
+-   Further EDA on other item families
+-   Further model hyper-parameter tuning
+-   EDA of effect of oil price, promotions, and re-investigate pay-day impact
 
 ## Production deployment considerations
+
+-   New items/stores without history need coding
+    -   Work required to develop an approach to estimating these events
+-   Corporación Favorita work in 2 week horizons
+    -   Regular model retraining (daily)
+    
+

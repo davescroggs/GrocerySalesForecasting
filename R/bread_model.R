@@ -8,7 +8,6 @@ library(tidyverse)
 library(lubridate)
 library(here)
 library(tidymodels)
-library(glmnet)
 library(xgboost)
 
 # doParallel::registerDoParallel(core = 4)
@@ -210,6 +209,7 @@ workflow(preprocessor = sales_recipe_full,spec = xgb_model) %>%
 # - XGB run significantly faster (~10 times)
 # - Results were similar
 # - Transactions have the highest importance of all the models but the data set doesn't project into the test set (for obvious reasons)
+# - Could transactions be imputed/estimated to give a more accurate result?
 
 # Next step, try to model all the BREAD/BAKERY family items together
 # See if hyper-parameter tuning improves results significantly and better differentiates the models.

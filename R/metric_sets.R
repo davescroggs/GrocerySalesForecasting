@@ -15,6 +15,7 @@ library(rlang)
 
 rmsle_vec <- function(truth, estimate, na_rm = TRUE, ...) {
   rmsle_impl <- function(truth, estimate) {
+    estimate <- if_else(estimate < 0, 0, estimate)
     sqrt(mean((log(truth + 1) - log(estimate + 1))^2))
   }
   
@@ -45,7 +46,8 @@ rmsle.data.frame <- function(data, truth, estimate, na_rm = TRUE, ...) {
   )
 }
 
-wrmsle_vec <- function(truth, estimate, weight, na_rm = TRUE, ...) {
+nwrmsle_vec <- function(truth, estimate, weight, na_rm = TRUE, ...) {
+  estimate <- if_else(estimate < 0, 0, estimate)
   res <- sqrt(sum(weight *(log(truth + 1) - log(estimate + 1))^2)/sum(weight))
   return(res)
 }

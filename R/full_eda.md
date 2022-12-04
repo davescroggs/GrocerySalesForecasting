@@ -132,7 +132,7 @@ train %>%
        col = "Quantile")
 ```
 
-![](C:\Users\DAVESC~1\DOCUME~1\RPROJE~1\GROCER~1\MARKDO~1\FULL_E~1/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](full_eda_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 #### Median unit sales per item
 
@@ -152,7 +152,7 @@ train %>%
        col = "Median")
 ```
 
-![](C:\Users\DAVESC~1\DOCUME~1\RPROJE~1\GROCER~1\MARKDO~1\FULL_E~1/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](full_eda_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 #### Store toal sales
 
@@ -175,7 +175,7 @@ total_sales %>%
        col = "Year")
 ```
 
-![](C:\Users\DAVESC~1\DOCUME~1\RPROJE~1\GROCER~1\MARKDO~1\FULL_E~1/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](full_eda_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 #### Store toal sales by cluster
 
@@ -197,7 +197,7 @@ stores %>%
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](C:\Users\DAVESC~1\DOCUME~1\RPROJE~1\GROCER~1\MARKDO~1\FULL_E~1/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](full_eda_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 - It appears as if clusters have a strong total sales relationship
 
@@ -219,7 +219,7 @@ cluster_total %>%
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](C:\Users\DAVESC~1\DOCUME~1\RPROJE~1\GROCER~1\MARKDO~1\FULL_E~1/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](full_eda_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ## Items
 
@@ -247,7 +247,7 @@ train %>%
 
     ## Joining, by = "item_nbr"
 
-![](C:\Users\DAVESC~1\DOCUME~1\RPROJE~1\GROCER~1\MARKDO~1\FULL_E~1/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](full_eda_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 #### Perishable
 
@@ -285,7 +285,7 @@ holidays %>%
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-![](C:\Users\DAVESC~1\DOCUME~1\RPROJE~1\GROCER~1\MARKDO~1\FULL_E~1/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](full_eda_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 #### Joining holidays to data set
 
@@ -333,4 +333,4 @@ train %>%
        fill = "Pay day")
 ```
 
-![](C:\Users\DAVESC~1\DOCUME~1\RPROJE~1\GROCER~1\MARKDO~1\FULL_E~1/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](full_eda_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->

@@ -1,12 +1,6 @@
 ---
 title: "Exploratory Data Analysis - Single bakery item"
 output: github_document
-
-knit: (function(inputFile, encoding) {
-      out_dir <- "../markdowns";
-      rmarkdown::render(inputFile,
-                        encoding=encoding,
-                        output_dir=file.path(dirname(inputFile), out_dir))})
 ---
 
 ```{r setup, include=FALSE}

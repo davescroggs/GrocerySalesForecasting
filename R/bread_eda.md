@@ -47,7 +47,7 @@ train %>%
   theme(axis.text.x = element_text(angle = 90))
 ```
 
-![](C:\Users\Dave%20Scroggs\Documents\R%20Projects\GrocerySalesForecasting\markdowns\bread_eda_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![](bread_eda_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ### Daily sales by store
 
@@ -62,7 +62,7 @@ train %>%
   geom_boxplot()
 ```
 
-![](C:\Users\Dave%20Scroggs\Documents\R%20Projects\GrocerySalesForecasting\markdowns\bread_eda_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](bread_eda_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 ### Total sales by day of the week
 
@@ -89,7 +89,7 @@ train %>%
                             min.segment.length = 0,nudge_x = -5000)
 ```
 
-![](C:\Users\Dave%20Scroggs\Documents\R%20Projects\GrocerySalesForecasting\markdowns\bread_eda_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](bread_eda_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ### Daily sale box plot
 
@@ -108,4 +108,4 @@ train %>%
   geom_boxplot()
 ```
 
-![](C:\Users\Dave%20Scroggs\Documents\R%20Projects\GrocerySalesForecasting\markdowns\bread_eda_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](bread_eda_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->

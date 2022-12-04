@@ -33,12 +33,21 @@ Final model - Tuned XGBoost
 -   hyper-parameters tuned: tree depth, min data points in a node, randomly sampled predictors
 -   Model evaluation: nwrmsle = 0.696
 
-![Feature importance](../figures/final_model_feature_importance.jpeg){width="456"}
+![Feature importance](../figures/final_model_feature_importance.jpeg)
 
 ## Residuals
 
-::: {layout-ncol=2}
-![Residuals](../figures/final_model_residuals.jpeg)
-![Extreme residuals](../figures/large_residuals.jpeg)
+-   Model tends to under-estimate the result
+-   Stratification of residuals, particularly in higher unit sales
 
-:::
+![Residuals](../figures/final_model_residuals.jpeg){width="250px"}
+
+## Residual outliers
+
+-   Holidays not included in model features
+    -   Potential reason for some extreme outliers
+-   Store results insensitive to increase in sales
+-   Stores in 42, 49 large overestimates
+    -   Only stores in Quito city, and Type C
+    -   Both dummy features had high importance
+

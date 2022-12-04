@@ -1,5 +1,5 @@
 ---
-title: "Exploratory Data Analysis - "
+title: "Exploratory Data Analysis - Full data"
 output: github_document
 
 knit: (function(inputFile, encoding) {
@@ -31,13 +31,12 @@ holidays <- read_csv(here("data/holidays_events.csv"))
  - 4100 sale items
 
 ```{r}
-tibble(table = c("holidays", "items", "oil", "stores", "test", "train", "transactions"),
-       rows = map_int(list(holidays, items, oil, stores, test, train, transactions),nrow),
-       cols = map_int(list(holidays, items, oil, stores, test, train, transactions),ncol),
+tibble(Table = c("holidays", "items", "oil", "stores", "test", "train", "transactions"),
+       Rows = map_int(list(holidays, items, oil, stores, test, train, transactions),nrow),
+       Columns = map_int(list(holidays, items, oil, stores, test, train, transactions),ncol),
        `Column names` = map_chr(list(holidays, items, oil, stores, test, train, transactions),~colnames(.x) %>% paste(collapse = ", "))) %>% 
-  arrange(-rows) %>% 
-  knitr::kable() %>% 
-  kableExtra::kable_styling()
+  arrange(-Rows) %>% 
+  knitr::kable(format = "markdown")
 ```
 
 ## Test/train
@@ -75,39 +74,40 @@ train %>%
             NAs = sum(is.na(day)),
             missing_days = setdiff(1:366,day) %>% findIntRuns() %>% paste(collapse = ", ")) %>% 
   arrange(min) %>% 
-  knitr::kable() %>% 
-  kableExtra::kable_styling()
+  knitr::kable(format = "markdown")
 ```
 
+
+## Transactions
+
+  - Transactions table continues until the end of the training date, there's no data available for dates in test
 
 ```{r}
-train %>% 
-  arrange(store_nbr, date) %>% 
-  mutate(dow = lubridate::wday(date, label = TRUE)) %>% 
-  group_by(store_nbr, dow) %>% 
-  summarise(unit_sales_total = sum(unit_sales),
-            n = n(),
-            .groups = "drop") %>% 
-  mutate(store_nbr = factor(store_nbr),
-         store_nbr = fct_reorder(store_nbr, unit_sales_total, sum)) %>% 
-  ggplot(aes(x = unit_sales_total, y = store_nbr, col = dow)) + 
-  geom_point() +
-  ggrepel::geom_label_repel(data = ~group_by(., dow) %>% sample_n(size = 1),
-                            aes(label = dow),
-                            min.segment.length = 0,nudge_x = -5000)
+transactions %>% 
+distinct(date, .keep_all = TRUE) %>% 
+  mutate(day = lubridate::yday(date)) %>% 
+  group_by(year = year(date)) %>% 
+  summarise(n = n(),
+            min = min(date),
+            max = max(date),
+            distinct_days = n_distinct(day),
+            NAs = sum(is.na(day)),
+            missing_days = setdiff(1:366,day) %>% findIntRuns() %>% paste(collapse = ", ")) %>% 
+  arrange(min) %>% 
+  knitr::kable(format = "markdown")
 ```
 
 
-### Stores
+## Stores
 
- - Some stores have days where their sales are much larger than their median sales
+ - Some stores have days where their sales are much larger than their median unit sales
 
 ```{r}
 train %>% 
   group_by(store_nbr) %>% 
   summarise(qtiles = quantile(unit_sales, probs = seq(0, 1, 0.25), na.rm = FALSE,
          names = TRUE) %>% list()) %>% 
-  unnest_auto(qtiles) %>% 
+  unnest_wider(qtiles) %>% 
   pivot_longer(cols = -store_nbr) %>%
   mutate(name = factor(name,
                             levels = c("0%","25%","50%","75%","100%"),
@@ -140,6 +140,8 @@ train %>%
 
 #### Store toal sales
 
+  - Some stores have a significant difference between their totals sales year-to-year
+  
 ```{r}
 total_sales <- train %>% 
   count(year = year(date), store_nbr, wt = unit_sales, name = "unit_sales") %>% 
@@ -149,7 +151,7 @@ total_sales %>%
   ggplot(aes(x = unit_sales, y = fct_reorder(store_nbr,unit_sales), col = factor(year))) +
   geom_point() +
   scale_color_brewer(palette = "Spectral") +
-  scale_x_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
+  scale_x_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
   labs(x = "Total unit sales (millions)",
        y = "Store number",
        title = "Yearly total unit sales",
@@ -160,7 +162,7 @@ total_sales %>%
 
 #### Store toal sales by cluster
 
- - Clusters contain between 
+ - Clusters contain between 1 and 7 stores
 
 ```{r}
 stores %>% 
@@ -191,7 +193,7 @@ cluster_total %>%
   ggplot(aes(x = unit_sales, y = fct_reorder(cluster,unit_sales))) +
   geom_point() +
   scale_color_brewer(palette = "Spectral") +
-  scale_x_continuous(labels = unit_format(unit = "M", scale = 1e-6)) +
+  scale_x_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
   labs(x = "Total unit sales (millions)",
        title = "Yearly total unit sales",
        y = "Cluster")  +
@@ -200,7 +202,7 @@ cluster_total %>%
 
 
 
-### Items
+## Items
 
 #### Which items are in the most/least number of stores
 
@@ -209,11 +211,7 @@ cluster_total %>%
 ```{r}
 train %>% 
   distinct(store_nbr, item_nbr) %>% 
-  left_join(items)
-
-t <- .Last.value
-
-t %>% 
+  left_join(items) %>% 
   count(family) %>% 
   mutate(type = "Store totals") %>% 
   bind_rows(items %>% 
@@ -236,34 +234,13 @@ t %>%
 items %>% 
   count(perishable) %>% 
   mutate(pct = scales::percent(n/sum(n))) %>% 
-  knitr::kable() %>% 
-  kableExtra::kable_styling()
-```
-
-## Promotions
-
-```{r}
-train %>% 
-  left_join(stores, by = "store_nbr") %>% 
-  group_by(store_nbr, type, onpromotion) %>% 
-  summarise(median_units = median(unit_sales),
-            .groups = "drop") %>% 
-  mutate(onpromotion = case_when(
-    onpromotion ~ "Promotoion",
-    !onpromotion ~ "Standard",
-    is.na(onpromotion) ~ "Missing",
-    TRUE ~ "Err")) %>% 
-  pivot_wider(names_from = onpromotion, values_from = median_units) %>% 
-  pivot_longer(cols = c(Promotoion, Missing)) %>% 
-  mutate(difference = value - Standard,
-         store_nbr = fct_reorder(factor(store_nbr), difference, sum)) %>% 
-  ggplot(aes(x = difference, y = store_nbr, col = name)) +
-  geom_point() +
-  geom_vline(xintercept = 0) +
-  facet_grid(type~., scales = "free_y")
+  knitr::kable(format = "markdown")
 ```
 
 ### Holidays
+
+ - There are National holidays that run throughout a large portion of the year
+ - There are sporadic local holidays in each locale that occur on approximately the same day each year
 
 ```{r}
 holidays %>% 
@@ -281,25 +258,35 @@ holidays %>%
 #### Joining holidays to data set
 
  - There's no common named key to join the holidays by locale
+ - Some locales may not have local holidays? They're the missing values?
 
 ```{r}
 holidays %>%
   mutate(tbl = "h") %>% 
   full_join(stores %>% mutate(tbl = "s"),
             by = c("locale_name" = "city")) %>% 
-  count(tbl.x, tbl.y)
+  count(tbl.x, tbl.y) %>% 
+  transmute(key_match = case_when(
+    !is.na(tbl.x) & !is.na(tbl.y) ~ "Match",
+    is.na(tbl.x) ~ "Holiday no locale",
+    is.na(tbl.y) ~ "Locale no holiday"), n)
 ```
 
 ### Pay day
-From the Kaggle comp - "Wages in the public sector are paid every two weeks on the 15 th and on the last day of the month. Supermarket sales could be affected by this."
+From the Kaggle comp - "Wages in the public sector are paid every two weeks on the 15th and on the last day of the month. Supermarket sales could be affected by this."
 
-- Appears that this has a minor effect on the total sales, when looking at all sales. The effect might be different in different item types.
+- Appears that this has a minor effect on the total sales, when looking at all sales. The effect might be different for different item types.
 
 ```{r}
 train %>% 
-  mutate(pay_day = if_else(date == ceiling_date(date, "month") - days(1) | day(date) == 15,1,0)) %>%
+  mutate(pay_day = if_else(date == ceiling_date(date, "month") - days(1) | day(date) == 15,TRUE,FALSE)) %>%
   count(date, pay_day, wt = unit_sales) %>% 
-  ggplot(aes(x = wday(date,label = T), y = n, col = factor(pay_day))) +
-  geom_boxplot()
+  ggplot(aes(x = wday(date,label = T), y = n, fill = factor(pay_day))) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("#CA3735", "#35C8CA")) +
+  theme_bw() +
+  labs(x = "Day of the week",
+       y = "Count",
+       fill = "Pay day")
 ```
 

@@ -44,7 +44,7 @@ Competition model data is 7 tables, test/train containing the predictor variable
 
 Normalized Weighted Root Mean Squared Logarithmic Error (NWRMSLE)
 
--   Weight (wi) are for perishable items (weight = 1.5), other items weight = 1
+-   Weight (wi) for perishable items (perishible wi = 1.5, other items wi = 1)
 
 -   Metric accounts for predicting results of a varying order of magnitude
 
@@ -60,9 +60,11 @@ $$ NWRMSLE = \sqrt{ \frac{\sum_{i=1}^{n} w_i \left( \ln(\hat{y}_i + 1) - \ln(y_i
 
 2.  Build a simple model on one item
 
+    -   EDA on single item
+
     -   Trial model algorithms
 
-    -   Trial data pre-processing
+    -   Trial data pre-processing recipes
 
     -   Test evaluation metric
 
@@ -80,11 +82,11 @@ $$ NWRMSLE = \sqrt{ \frac{\sum_{i=1}^{n} w_i \left( \ln(\hat{y}_i + 1) - \ln(y_i
 
     -   Detailed model evaluation
 
-## Exploratory Data Analysis
+## Exploratory Data Analysis (EDA)
 
 Results
   
--   Clear day-of-week trends (autocorrelation)
+-   Clear weekly trends (autocorrelation)
 -   Significant range in store sales (1-15 million units/year)
 -   Item family types
     - A few types had a large proportion of all items
@@ -106,17 +108,18 @@ Results
     - Recipe 1: store number and temporal data
     - Recipe 2: store information (number, location, type, cluster and daily transactions) and temporal data
     - Recipe 3: As above and includes pay-day information
--   Trialled 2 model algorithms
-    - Random forest
-    - XGBoost
--   Model algorithms had similar accuracy
--   Recipe 2 had best accuracy
+-   Trialled 2 model algorithms - Random forest and XGBoost
 
 Issues
   
 -   Random forest model fit times were long for the simple model
+-   Custom metric caused error with parallel processing
 
 ## First model results
+
+-   Model algorithms had similar accuracy
+-   XGBoost model fit 1-2 orders of magnitude faster
+-   Recipe 2 had best accuracy
 
 |Recipe   |model       |.metric |      mean|  n|
 |:--------|:-----------|:-------|---------:|--:|
@@ -129,11 +132,11 @@ Issues
 
 ## Bakery/bread family model
 
--   A model fitting the bread/bakery item family
+-   Modelled the bread/bakery item family (134 items)
 
 Results
   
--   XGBoost model and Full recipe from simple model used
+-   XGBoost and Recipe 2 from first model used
 -   Hyper-parameters tuned: tree depth, min data points in a node, randomly sampled predictors
 -   Model evaluation: nwrmsle = 0.696 (good kaggle results \~ 0.50-0.53)
 
@@ -141,6 +144,10 @@ Results
 
 ## Hyper-parameter tuning results
 
+-   Trialled 2 combinations in each range (high-low)
+-   Tuning run time 5 minutes for 5% of training data, 4 parameter sets
+-   Tuned using racing (early stop) method
+-   Lowest rmse used (row 1 below)
 
 | mtry| min_n| tree_depth| trees| learn_rate|.metric |     mean|  n|
 |----:|-----:|--------:|-----:|-------:|:-----|-----:|--:|
@@ -200,3 +207,4 @@ Note: Metric is rmse
     -   Develop item forecast performance metric
         -   Continuous monitoring of results
     -   Monitor and log large model errors (new holidays)
+-   Cloud machine size (memory, cores) will be important
